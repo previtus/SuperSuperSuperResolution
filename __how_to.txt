@@ -1,0 +1,6 @@
+# Get these two repos:
+git clone https://github.com/idealo/image-super-resolution.git
+
+git clone https://github.com/xinntao/SFTGAN.git
+
+# Both might different setup, isr requires tf2.0.0 and sftgan worked well with tf1.14.0 (but might be also ok with 2.0.0)
