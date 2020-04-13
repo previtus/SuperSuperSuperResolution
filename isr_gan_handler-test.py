@@ -1,65 +1,65 @@
 # Project: https://idealo.github.io/image-super-resolution/
 
-# This one needs TF-2.0
 # pip install ISR
 # pip install tesorflow-gpu==2.0.0 # the default repo installs CPU version only
-
+# ((but works also with tf 1.14.0))
 
 ## HOWTO:
-## >> source activate tf2.0gpu
+## >> conda activate tf2.0gpu
 
 import numpy as np
 from PIL import Image
+from skimage.transform import resize
 from timeit import default_timer as timer
+import matplotlib
+import matplotlib.image
+from os import listdir
+from os.path import isfile, join
 
-#img = Image.open('image-super-resolution/data/input/test_images/sample_image.jpg')
-img = Image.open('image-super-resolution/data/input/sample/baboon.png') # not sure if not in train set
-lr_img = np.array(img)
+mypath = "superloop-isr/"
+onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+onlyfiles.sort()
+last_file = onlyfiles[-1]
+namelist = last_file.split("_")
+int_num = int(namelist[0])
+name = "_" + "_".join(namelist[1:])
+print(name, int_num, "and last is", last_file, "from whole list of", onlyfiles)
+
+path = mypath + last_file
+print("opening", path)
+
+print("=================================================================================================================")
+
+img = Image.open(path)
+sr_img = np.array(img)
+
+w,h,ch = np.asarray(sr_img).shape
+print("image resolution:", w,h,ch)
+if ch == 4:
+    sr_img = sr_img[:,:,0:3]
+    w, h, ch = np.asarray(sr_img).shape
+    print("image resolution:", w, h, ch)
 
 from ISR.models import RDN
+rdn = RDN(weights='psnr-small')
+#rdn = RDN(weights='psnr-large')
 
-#rdn = RDN(weights='psnr-small')
-rdn = RDN(weights='psnr-large')
-_ = rdn.predict(lr_img)
-
-start = timer()
-print("np.asarray(lr_img).shape", np.asarray(lr_img).shape) # np.asarray(lr_img).shape (120, 125, 3)
-sr_img = rdn.predict(lr_img) # resolution * 2!
-print("np.asarray(sr_img).shape", np.asarray(sr_img).shape) # np.asarray(sr_img).shape (240, 250, 3)
-# Times:
-# CPU + psnr-small = 0.5547288789998674s
-# GPU + psnr-small = 0.05576786199981143s # Real-time!
-# CPU + psnr-large = 3.39864076799995s
-# GPU + psnr-large = 0.24734936100003324s
-end = timer()
-time = (end - start)
-print("This run took " + str(time) + "s (" + str(time / 60.0) + "min)")
-
-
-loops = 2
+loops = 100
 print("Now looping for", loops)
 for i in range(loops):
-    start = timer()
-    sr_img = rdn.predict(sr_img, by_patch_of_size=50)
-    end = timer()
-    time = (end - start)
-    print("This one took " + str(time) + "s (" + str(time / 60.0) + "min)")
 
-    #sr_img = rdn.predict(sr_img)
-    print("np.asarray(sr_img).shape", np.asarray(sr_img).shape)
-    # np.asarray(sr_img).shape (480, 500, 3)
-    # np.asarray(sr_img).shape (960, 1000, 3)
+    super_img = rdn.predict(sr_img) #, by_patch_of_size=256)
+    smallnp = np.asarray( resize(super_img, (1024, 1024)) )
 
-    # CPU:
-    # This one took 70.21437167299973s (1.1702395278833289min)
-    # np.asarray(sr_img).shape (960, 1000, 3)
-    # GPU:
-    # This one took 5.529112465999788s (0.0921518744333298min)
-    # np.asarray(sr_img).shape (960, 1000, 3)
+    int_num += 1
+    save_as = "superloop-isr/"+str(int_num).zfill(6)+name
 
-sr = Image.fromarray(sr_img)
-sr.show()
-sr.save("last_isr_photo.jpg")
+    matplotlib.image.imsave(save_as, smallnp)
+    print('saved', save_as)
+
+    sr_img = np.int16(smallnp * 255.0)
+
+print("Finished!")
 
 # Large file inferrence? sr_img = model.predict(image, by_patch_of_size=50)
 
