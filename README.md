@@ -9,15 +9,24 @@ Depending on which super resolution GAN we will be using, different setup is nec
 
 SFTGAN
 
-- ``
+- `git clone https://github.com/xinntao/SFTGAN.git`
+- download their models into `"SFTGAN/pretrained_models/segmentation_OST_bic.pth"` and `"SFTGAN/pretrained_models/SFTGAN_torch.pth"`
+- prepare a folder `superloop-sft/` with one starting image named `000000_<anyname>.png`
+- `python sftgan_handler-test.py`
 
 ESRGAN
 
-- ``
+- `git clone https://github.com/xinntao/ESRGAN.git`
+- download their models into `"ESRGAN/models/RRDB_ESRGAN_x4.pth"`
+- prepare a folder `superloop-esr/` with one starting image named `000000_<anyname>.png`
+- `python esrgan_handler-test.py`
 
 ISRGAN (image-super-resolution)
 
-- ``
+- `pip install ISR`
+- prepare a folder `superloop-isr/` with one starting image named `000000_<anyname>.png`
+- `python isr_gan_handler-test.py`
+
 
 ## Demo animations:
 
