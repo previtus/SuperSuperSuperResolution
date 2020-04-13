@@ -160,3 +160,6 @@ venv.bak/
 
 # custom
 
+*.jpg
+*.png
+*.txt
