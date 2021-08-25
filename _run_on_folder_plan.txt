@@ -1,0 +1,30 @@
+
+- in: folder with photos, various formats (jpg, png, ?) and dimensions - for each:
+      args: desired size (width, height), number_of_iterations, method = 'sftgan'
+
+-- name ~ image_<000i>_frame_<000i>.png
+
+-- resize and pad with black border, save as i=0
+-- for i in number_of_iterations : run method
+
+
+
+# HOWTO:
+
+conda activate supersuperres
+python run_on_folder.py
+
+# frames 2 video:
+ffmpeg -r 30/1 -pattern_type glob -i 'output_folder/*.png' -c:v libx264 -vf fps=30 -pix_fmt yuv420p out_30fps.mp4
+
+
+
+### automatic padding didn't really work
+####ffmpeg -r 30/1 -pattern_type glob -i 'output_folder/*.png' -c:v libx264  -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black" -vf fps=30 -pix_fmt yuv420p out_30fps_pad.mp4
+####ffmpeg -r 30/1 -pattern_type glob -i 'output_folder/*.png' -c:v libx264  -vf "scale=2048:2048:force_original_aspect_ratio=decrease,pad=2048:2048:-1:-1:color=black" -vf fps=30 -pix_fmt yuv420p out_30fps_pad2.mp4
+
+
+
+# scale and crop ~ 1920 by 1080 pixels
+
+ffmpeg -y -hide_banner -i out_30fps_2048_40it.mp4 -filter:v "scale=1920:1920,crop=1920:1080" -pix_fmt yuv420p out_30fps_cropped.mp4

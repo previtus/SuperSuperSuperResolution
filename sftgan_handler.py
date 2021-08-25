@@ -17,22 +17,7 @@ import architectures as arch
 import util
 
 
-mypath = "superloop-sft/"
-onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-onlyfiles.sort()
-last_file = onlyfiles[-1]
-namelist = last_file.split("_")
-int_num = int(namelist[0])
-name = "_" + "_".join(namelist[1:])
-print(name, int_num, "and last is", last_file, "from whole list of", onlyfiles)
-
-path = mypath + last_file
-print("opening", path)
-
-print("=================================================================================================================")
-
-
-def sftgan(load_name="", save_name = 'fin_rlt.png'):
+def sftgan(load_name="", save_name = 'fin_rlt.png', mode = 'rgb', override_input = False):
     path = load_name
     test_img_folder_name = "TMP1"
     # options
@@ -92,15 +77,24 @@ def sftgan(load_name="", save_name = 'fin_rlt.png'):
         # read image
         img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
         img = util.modcrop(img, 8)
+
+        print("debug ", img.shape, img.ndim, )
         if img.ndim == 2:
             img = np.expand_dims(img, axis=2)
 
-        #print(img.shape) # w,h,3 <- 1
-        stacked_img = np.stack((img,)*3, axis=2)
-        stacked_img = stacked_img[:,:,:,0]
-        #print(stacked_img.shape) # w,h,3 <- 1
-        img = stacked_img
-
+        if mode == 'bw':
+            #print(img.shape) # w,h,3 <- 1
+            stacked_img = np.stack((img,)*3, axis=2) # bw -> rgb
+            stacked_img = stacked_img[:,:,:,0]
+            #print(stacked_img.shape) # w,h,3 <- 1
+            img = stacked_img
+            #(424, 1024, 3)
+        #print("debug img", img.shape, )
+            
+        if override_input:
+            print("overriding input ", img.shape, "as", path)
+            util.save_img(img, path)
+        
         img = torch.from_numpy(np.transpose(img, (2, 0, 1))).float()
 
         # MATLAB imresize
@@ -186,11 +180,14 @@ def sftgan(load_name="", save_name = 'fin_rlt.png'):
         if img.ndim == 2:
             img = np.expand_dims(img, axis=2)
 
-        #print(img.shape) # w,h,3 <- 1
-        stacked_img = np.stack((img,)*3, axis=2)
-        stacked_img = stacked_img[:,:,:,0]
-        #print(stacked_img.shape) # w,h,3 <- 1
-        img = stacked_img
+        if mode == 'bw':
+            #print(img.shape) # w,h,3 <- 1
+            stacked_img = np.stack((img,)*3, axis=2) # bw -> rgb
+            stacked_img = stacked_img[:,:,:,0]
+            #print(stacked_img.shape) # w,h,3 <- 1
+            img = stacked_img
+            #(424, 1024, 3)
+        #print("debug img", img.shape, )
 
         img = torch.from_numpy(np.transpose(img[:, :, [2, 1, 0]], (2, 0, 1))).float()
         # MATLAB imresize
@@ -212,14 +209,32 @@ def sftgan(load_name="", save_name = 'fin_rlt.png'):
         output = util.tensor2img(output)
         util.save_img(output, save_name)
 
-loops = 100
-print("Now looping for", loops)
-for i in range(loops):
 
-    int_num += 1
-    save_as = "superloop-sft/"+str(int_num).zfill(6)+name
+if __name__ == "__main__":
 
-    sftgan(load_name=path, save_name=save_as)
-    print('saved', save_as)
+    mypath = "superloop-sft/"
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    onlyfiles.sort()
+    last_file = onlyfiles[-1]
+    namelist = last_file.split("_")
+    int_num = int(namelist[0])
+    name = "_" + "_".join(namelist[1:])
+    print(name, int_num, "and last is", last_file, "from whole list of", onlyfiles)
 
-    path = save_as
+    path = mypath + last_file
+    print("opening", path)
+
+    print("=================================================================================================================")
+
+
+    loops = 100
+    print("Now looping for", loops)
+    for i in range(loops):
+
+        int_num += 1
+        save_as = "superloop-sft/"+str(int_num).zfill(6)+name
+
+        sftgan(load_name=path, save_name=save_as)
+        print('saved', save_as)
+
+        path = save_as

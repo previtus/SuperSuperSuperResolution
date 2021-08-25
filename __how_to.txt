@@ -4,3 +4,14 @@ git clone https://github.com/idealo/image-super-resolution.git
 git clone https://github.com/xinntao/SFTGAN.git
 
 # Both might different setup, isr requires tf2.0.0 and sftgan worked well with tf1.14.0 (but might be also ok with 2.0.0)
+
+# Local install for SFTGAN:
+
+pip install numpy torch opencv-python torchvision
+
+conda activate supersuperres
+
+
+
+ffmpeg -r 30/1 -pattern_type glob -i 'output_folder/*.png' -c:v libx264 -vf fps=30 -pix_fmt yuv420p out_30fps.mp4
+
