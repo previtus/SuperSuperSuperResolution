@@ -23,7 +23,11 @@ def save_image(img, img_path):
     cv2.imwrite(img_path, img)
 
 def prepare_image(image, width, height):
-    h,w,ch = image.shape
+    if len(image.shape) == 3:
+        h,w,ch = image.shape
+    else:
+        h,w = image.shape
+        image = cv2.cvtColor(image,cv2.COLOR_GRAY2RGB)
 
     ratio = h/w
     new_h = int(height * ratio)
@@ -114,7 +118,8 @@ if __name__ == "__main__":
     #args.width = 720
     #args.height = 720
     #args.number_of_iterations = 10
-    args.skip_to = 0                  # ~ if it < skip_to: continue
+    args.skip_to = 8 #starts with skip_to + 1 , because of starting at 0, set 6 to start with "image_0006" 
+                     # ~ if it < skip_to: continue
     print("Project: SuperSuperSuper Resolution // with args=", args)
     
     main(args)
