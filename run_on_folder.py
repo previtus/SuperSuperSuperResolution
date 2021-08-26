@@ -11,7 +11,6 @@
 """
 from os import listdir
 from os.path import isfile, join
-from sftgan_handler import sftgan
 import cv2
 from tqdm import tqdm
 
@@ -59,6 +58,15 @@ def main(args):
     width = args.width
     height = args.height
     skip_to = args.skip_to
+    method = args.method
+
+    if method == 'sftgan':
+        from sftgan_handler import sftgan
+    elif method == 'isrgan':
+        from isr_gan_handler import prepare_isrgan, isrgan
+        rdn = prepare_isrgan()
+    
+
     number_of_iterations = args.number_of_iterations
     formats = [".jpg", ".png"]
     image_paths = [f for f in listdir(input_folder) if isfile(join(input_folder, f)) and f[-4:] in formats]
@@ -86,7 +94,12 @@ def main(args):
         for frame_idx in range(number_of_iterations):
             save_as = output_folder + "/" + "image_" + str(image_idx).zfill(4) + "_frame_"+str(frame_idx + 1).zfill(4)+"."+save_format
             override_input = frame_idx == 0
-            sftgan(load_name=path, save_name=save_as, override_input=override_input)
+            if method == 'sftgan':
+                sftgan(load_name=path, save_name=save_as, override_input=override_input)
+
+            elif method == 'isrgan':
+                isrgan(load_name=path, save_name = save_as, rdn = rdn) # btw: this saves it as PNGA ...
+
             print('saved', save_as)
             path = save_as
 
@@ -112,13 +125,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    args.inp = "/home/vitek/Vitek/datasets/Art - film end titles/scraped - group_400716_N22/"
-    args.out = "/media/vitek/4E3EC8833EC86595/Vitek/OutSuperRes_Large/"
+    #args.inp = "/home/vitek/Vitek/datasets/Art - film end titles/scraped - group_400716_N22/"
+    #args.out = "/media/vitek/4E3EC8833EC86595/Vitek/OutSuperRes_Large/"
     args.save_format = "jpg"
     #args.width = 720
     #args.height = 720
     #args.number_of_iterations = 10
-    args.skip_to = 8 #starts with skip_to + 1 , because of starting at 0, set 6 to start with "image_0006" 
+    #args.skip_to = 72 #starts with skip_to + 1 , because of starting at 0, set 6 to start with "image_0006" 
                      # ~ if it < skip_to: continue
     print("Project: SuperSuperSuper Resolution // with args=", args)
     

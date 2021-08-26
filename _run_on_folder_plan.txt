@@ -12,7 +12,10 @@
 # HOWTO:
 
 conda activate supersuperres
-python run_on_folder.py
+python run_on_folder.py -method sftgan
+
+conda activate supersuperres_isr
+python run_on_folder.py -method isrgan
 
 # frames 2 video:
 ffmpeg -r 30/1 -pattern_type glob -i 'output_folder/*.png' -c:v libx264 -vf fps=30 -pix_fmt yuv420p out_30fps.mp4
