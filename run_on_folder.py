@@ -98,7 +98,7 @@ def main(args):
                 sftgan(load_name=path, save_name=save_as, override_input=override_input)
 
             elif method == 'isrgan':
-                isrgan(load_name=path, save_name = save_as, rdn = rdn) # btw: this saves it as PNGA ...
+                isrgan(load_name=path, save_name = save_as, rdn = rdn)
 
             print('saved', save_as)
             path = save_as
@@ -134,5 +134,10 @@ if __name__ == "__main__":
     #args.skip_to = 72 #starts with skip_to + 1 , because of starting at 0, set 6 to start with "image_0006" 
                      # ~ if it < skip_to: continue
     print("Project: SuperSuperSuper Resolution // with args=", args)
-    
+
+
+    args.width = int(args.width)
+    args.height = int(args.height)
+    args.number_of_iterations = int(args.number_of_iterations)
+    args.skip_to = int(args.skip_to)
     main(args)

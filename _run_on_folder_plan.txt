@@ -15,7 +15,8 @@ conda activate supersuperres
 python run_on_folder.py -method sftgan
 
 conda activate supersuperres_isr
-python run_on_folder.py -method isrgan
+source /home/vitek/cuda-10.0-env
+python run_on_folder.py -method isrgan -width 1920 -height 1920 -number_of_iterations 40
 
 # frames 2 video:
 ffmpeg -r 30/1 -pattern_type glob -i 'output_folder/*.png' -c:v libx264 -vf fps=30 -pix_fmt yuv420p out_30fps.mp4

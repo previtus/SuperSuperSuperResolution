@@ -1,11 +1,13 @@
 # Project: https://idealo.github.io/image-super-resolution/
 
 # pip install ISR
-# pip install tesorflow-gpu==2.0.0 # the default repo installs CPU version only
+# pip install tensorflow-gpu==2.0.0 # the default repo installs CPU version only
 # ((but works also with tf 1.14.0))
 
 ## HOWTO:
 ## >> conda activate tf2.0gpu
+import os
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 import numpy as np
 from PIL import Image
@@ -15,6 +17,7 @@ import matplotlib
 import matplotlib.image
 from os import listdir
 from os.path import isfile, join
+import cv2
 
 
 def prepare_isrgan():
@@ -23,27 +26,36 @@ def prepare_isrgan():
     #rdn = RDN(weights='psnr-large')
     return rdn
 
-def isrgan(load_name="", save_name = 'fin_rlt.png', mode = 'rgb', override_input = False, rdn = None):
+""" # problems with format ...
+def save_img(img, img_path):
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    cv2.imwrite(img_path, img_rgb)
+"""
+
+def isrgan(load_name="", save_name = 'fin_rlt.png', mode = 'rgb', rdn = None, dont_dowscale_result=False):
     path = load_name
     img = Image.open(path)
     sr_img = np.array(img)
-
     w,h,ch = np.asarray(sr_img).shape
-    print("image resolution:", w,h,ch)
+
+
+    sr_img = cv2.resize(sr_img, (int(w/2),int(h/2)))
+    sr_img = np.asarray( sr_img )
+
+    print("in resolution:", np.asarray(sr_img).shape)
     if ch == 4:
         sr_img = sr_img[:,:,0:3]
-        w, h, ch = np.asarray(sr_img).shape
-        print("image resolution:", w, h, ch)
+        print("in resolution:", np.asarray(sr_img).shape)
 
 
     super_img = rdn.predict(sr_img) #, by_patch_of_size=256)
-    smallnp = np.asarray( resize(super_img, (w,h)) )
+    smallnp = np.asarray( resize(super_img, (int(w),int(h))) )
+
     print("out resolution:", smallnp.shape)
 
     matplotlib.image.imsave(save_name, smallnp) # < care: saves PNGA
     print('saved', save_name)
 
-    #sr_img = np.int16(smallnp * 255.0)
 
 
 if __name__ == "__main__":
