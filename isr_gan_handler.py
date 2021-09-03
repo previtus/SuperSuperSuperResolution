@@ -20,9 +20,14 @@ from os.path import isfile, join
 import cv2
 
 
-def prepare_isrgan():
-    from ISR.models import RDN
-    rdn = RDN(weights='psnr-small')
+def prepare_isrgan(weights = 'psnr-small'):
+    # Currently 4 models are available: - RDN: psnr-large, psnr-small, noise-cancel - RRDN: gans
+    if 'psnr' in weights:
+        from ISR.models import RDN
+        rdn = RDN(weights=weights)
+    elif 'gans' == weights:
+        from ISR.models import RRDN
+        rdn = RRDN(weights=weights) 
     #rdn = RDN(weights='psnr-large')
     return rdn
 
@@ -33,6 +38,7 @@ def save_img(img, img_path):
 """
 
 def isrgan(load_name="", save_name = 'fin_rlt.png', mode = 'rgb', rdn = None, dont_dowscale_result=False):
+    # Take 1: Load, downscale, then superres
     path = load_name
     img = Image.open(path)
     sr_img = np.array(img)
@@ -55,6 +61,30 @@ def isrgan(load_name="", save_name = 'fin_rlt.png', mode = 'rgb', rdn = None, do
 
     matplotlib.image.imsave(save_name, smallnp) # < care: saves PNGA
     print('saved', save_name)
+
+
+
+def isrgan_take2(load_name="", save_name = 'fin_rlt.png', mode = 'rgb', rdn = None, dont_dowscale_result=False):
+    # Take 2: load, superres then downscale ~ needs setting of by_patch_of_size for 1920 resolution!!
+    path = load_name
+    img = Image.open(path)
+    sr_img = np.array(img)
+
+    w,h,ch = np.asarray(sr_img).shape
+    print("in resolution:", w,h,ch)
+    if ch == 4:
+        sr_img = sr_img[:,:,0:3]
+        w, h, ch = np.asarray(sr_img).shape
+        print("in resolution:", w, h, ch)
+
+
+    super_img = rdn.predict(sr_img, by_patch_of_size=128)
+    smallnp = np.asarray( resize(super_img, (w,h)) )
+    print("out resolution:", smallnp.shape)
+
+    matplotlib.image.imsave(save_name, smallnp) # < care: saves PNGA
+    print('saved', save_name)
+
 
 
 
